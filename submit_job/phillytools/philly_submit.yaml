@@ -1,0 +1,48 @@
+target:
+  service: philly
+  cluster: rr1
+  vc: resrchvc
+
+environment:
+  image: ninja0/mmdet:cuda101
+
+storage:
+  # default:
+  #   storage_account_name: njrr1
+  #   container_name: v-jining
+  output:
+    storage_account_name: njrr1
+    container_name: v-jining
+    mount_dir: /mnt/output
+  data:
+    storage_account_name: njrr1
+    container_name: v-jining
+    mount_dir: /mnt/io
+
+code:
+  local_dir: /data/home/v-jining/condconv-reppoints
+
+data:
+  data_upload: False
+  remote_dir: data
+  storage_id: data
+
+search:
+  job_template:
+    # you may use {random_string:s} to avoid job name collisions
+    # {auto:3s} generates lr_0.00000_mom_0.5, .. etc
+    # {auto:2s} generates lr_0.00000_mo_0.5, .. etc
+    name: condconv_{experiment_name:s}-{auto:s}
+    sku: G8
+    command:
+      - pip uninstall mmcv-full -y
+      - pip install -v -e . --user
+      - bash tools/dist_train.sh {config} 8
+  type: grid
+  max_trials: 1
+  params:
+    - name: config
+      spec: discrete
+      # values: ['configs/reppoints_v1_condconv/reppoints_condconv_minmax_r50_fpn_1x_coco.py', 'configs/reppoints_v1_condconv/reppoints_condconv_minmax_r50_fpn_1x_coco_seg.py', 'configs/reppoints_v1/reppoints_minmax_r50_fpn_1x_coco.py', 'configs/reppoints_v1_condconv/reppoints_condconv_minmax_r50_fpn_1x_coco_det.py']
+      values: ['configs/reppoints_v1_condconv/reppoints_condconv_minmax_r50_fpn_1x_coco.py']
+
