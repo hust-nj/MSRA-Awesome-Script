@@ -1,8 +1,8 @@
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu16.04
+FROM nvidia/cuda:11.0-cudnn8-devel-ubuntu16.04
 
 # Labels for the docker
-LABEL description="This docker has pytorch 1.7.1 in python37 with cuda 10.1, and cudnn 7.0." \
-      tag="pytorch1.7.1-py37-cuda10.1-openmpi-mmcv-apex-timm" \
+LABEL description="This docker has pytorch 1.7.1 in python37 with cuda 11.0, and cudnn 8.0." \
+      tag="pytorch1.7.1-py37-cuda11.0-openmpi-mmcv-apex-timm" \
       creator="ninja" tooltype="pytorch" \
       tooltypeversion="1.7.1" \
       createtime="06/08/2021"
@@ -75,13 +75,9 @@ RUN mkdir /tmp/openmpi && \
     ldconfig && \
     rm -rf /tmp/openmpi
 
-RUN conda install -y pytorch==1.7.1 torchvision torchaudio cudatoolkit=10.1 -c pytorch
+RUN conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=11.0 -c pytorch
 
 RUN export CUDA_HOME="/usr/local/cuda"
-
-RUN pip install mmcv-full==1.3.3 -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.1/index.html
-
-RUN pip install "git+https://github.com/open-mmlab/cocoapi.git#subdirectory=pycocotools"
 
 RUN pip install terminaltables
 
@@ -89,7 +85,6 @@ RUN pip install future tensorboard
 
 RUN git clone https://github.com/NVIDIA/apex && \
     cd apex && \
-    git reset --hard e5f2f675de1c4e85e772065e550db55b13264265 && \
     pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./ && \
     cd ..
 
@@ -97,6 +92,9 @@ RUN pip install timm==0.3.2
 RUN conda config --add channels conda-forge
 RUN conda install -y imgaug
 
+RUN pip install mmcv-full==1.3.3 -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.1/index.html
+
+RUN pip install "git+https://github.com/open-mmlab/cocoapi.git#subdirectory=pycocotools"
 RUN apt-get update && apt-get install -y --no-install-recommends net-tools
 
 WORKDIR /root
